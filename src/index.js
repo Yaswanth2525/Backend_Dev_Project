@@ -1,6 +1,8 @@
 // require('dotenv').config({path:"./env"})
 import dotenv from 'dotenv'
 import connectDB from "./db/index.js";
+import { app } from './app.js';
+
 //in mongoDB,don't allow anywhere while working deployment tools like digitalocean..etc.
 //git status
 
