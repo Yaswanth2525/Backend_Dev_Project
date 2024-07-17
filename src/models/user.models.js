@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 const userSchema = new Schema(
     {
         username : {
-            typeof : String,
+            type : String,
             required : true,
             unique : true,
             lowercase : true,
@@ -15,44 +15,44 @@ const userSchema = new Schema(
             index : true,
         },
         email : {
-            typeof : String,
+            type : String,
             required : true,
             unique : true,
             lowercase : true,
             trim : true,
         },
-        fullname : {
-            typeof : String,
+        fullName : {
+            type : String,
             required : true,
             lowercase : true,
             trim : true,
             index : true,
         },
         avatar : {
-            typeof : String,//cloudinary url
+            type : String,//cloudinary url
             required : true,
         },
         coverImage : {
-            typeof : String,//cloudinary url
+            type : String,//cloudinary url
         },
         watchHistory : [
             {
                 type : Schema.Types.ObjectId,
                 ref : "Video",
-            }
+            },
         ],
         password : {
-            typeof : String,
+            type : String,
             required : [true , 'Password is required']
         },
         refreshToken :{
-            typeof : String
+            type : String
         }
     },
     {
         timestamps : true
     }
-)
+);
 
 userSchema.pre("save",async function (next) {
     if(!this.isModified("passowrd"))
@@ -71,7 +71,7 @@ userSchema.methods.generateAccessToken = function(){
             _id : this._id,
             email : this.email,
             username : this.username,
-            fullname : this.fullname,
+            fullName : this.fullName,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {

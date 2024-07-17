@@ -7,7 +7,7 @@ import { app } from './app.js';
 //git status
 
 dotenv.config({
-    path:'./env'
+    path:'./.env'
 })
 
 connectDB()
@@ -16,9 +16,10 @@ connectDB()
         console.log("ERRR: ",error);
         throw error
     })
-    app.listen(process.env.PORT || 8000,() => {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT,() => {
         //callback
-        console.log(` Server is running at port : ${process.env.PORT}`)
+        console.log(` Server is running at port : ${PORT}`)
     })
 })
 .catch((err)=>{
