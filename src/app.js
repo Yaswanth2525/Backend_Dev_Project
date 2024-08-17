@@ -22,15 +22,33 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 app.get('/',(req,res)=>{
-    res.send('API is running....');
+    res.send("API IS RUNNING PLEASE FIX ISSUE");
 })
 
 
 //routers import 
-import userRouter from './routers/user.routers.js'
+import userRouter from './routers/user.routes.js'
+import videoRouter from './routers/video.routes.js'
+import commentRouter from './routers/comment.routes.js'
+import dashboardRouter from './routers/dashboard.routes.js'
+import healthcheckRouter from './routers/healthcheck.routes.js'
+import likeRouter from './routers/like.routes.js'
+import playlistRouter from './routers/playlist.routes.js'
+import subscriptionRouter from './routers/subscription.routes.js'
+import tweetRouter from './routers/tweet.routes.js'
 
 //routers declaration
 app.use("/api/v1/users",userRouter)
+app.use("api/v1/videos",videoRouter)
+app.use("api/v1/comments",commentRouter)
+app.use("api/v1/dashboard",dashboardRouter)
+app.use("api/v1/healthcheck",healthcheckRouter)
+app.use("api/v1/likes",likeRouter)
+app.use("api/v1/playlists",playlistRouter)
+app.use("api/v1/subscriptions",subscriptionRouter)
+app.use("api/v1/tweets",tweetRouter)
+
+
 
 // http://localhost:8000/api/v1/users/register
 export { app }
