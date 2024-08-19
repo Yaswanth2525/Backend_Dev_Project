@@ -13,6 +13,10 @@ const generateAccessAndRefreshTokens = async (userId) => {
     try{
         const user = await User.findById(userId);
 
+        if(!user){
+            throw new ApiError(404,"user doesn't exist");
+        }
+
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
 
@@ -22,7 +26,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
         return {accessToken,refreshToken}
 
     }catch(error){
-        throw new ApiError(50,"Something went wrong while generating refresh and access token")
+        throw new ApiError(500,`error generating access and refresh token : ${error.message}`);
     }
 }
 
@@ -69,9 +73,10 @@ const registerUser = asyncHandler( async (req,res) => {
         Array.isArray(req.files.coverImage) &&
         req.files.coverImage.length > 0
     ) {
-        coverImageLocalPath = req.files.coverImage[0];
+        coverImageLocalPath = file?.coverImage[0].path;
+    }else{
+        throw new ApiError(500,"coverImage path not found")
     }
-
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required");
     }
@@ -98,7 +103,7 @@ const registerUser = asyncHandler( async (req,res) => {
         "-password -refreshToken"
     );
     //8
-    if (createdUser) {
+    if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");
     }
     //9
@@ -115,7 +120,7 @@ const loginUser = asyncHandler ( async (req,res) => {
     //5.generate access and refresh token
     //6.send cookies
     //1
-    const {email,username,password} = await req.body
+    const {email,username,password} = req.body
     //2
     if(!username && !email){
         throw new ApiError(400,"username or email is required")
@@ -129,7 +134,7 @@ const loginUser = asyncHandler ( async (req,res) => {
         throw new ApiError(404,"User does not exist")
     }
     //4
-    const isPasswordValid = await user.isPasswordCorrect(password)
+    const isPasswordValid = await user.isPasswordCorrect(password);
 
     if(!isPasswordValid){
         throw new ApiError(401,"Invalid user credentials")
@@ -194,7 +199,7 @@ const refreshAccessToken = asyncHandler ( async(req,res) =>{
     try{
         const decodedToken = jwt.verify(
             incomingRefreshToken,
-            process.env.ACCESS_TOKEN_SECRET
+            process.env.REFRESH_TOKEN_SECRET
         );
 
         const user = await User.findById(decodedToken?._id);
@@ -261,7 +266,7 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 
 const getCurrentUser = asyncHandler(async(req,res)=>{
     return res
-    .statu(200)
+    .status(200)
     .json(
         new ApiResponse(
             200,
@@ -289,7 +294,7 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
     ).select("-password")
     
     return res
-    .statu(200)
+    .status(200)
     .json(
         new ApiResponse(
             200,
@@ -364,8 +369,10 @@ const updataUserCoverImage = asyncHandler(async(req,res)=>{
     )
 })
 
-const getUserChannelProfile = asyncHandler(async(res,req)=>{
-    const {username} = await req.params
+const getUserChannelProfile = asyncHandler(async(req,res)=>{
+    //path parameter vs query parameter
+    //path are compulsory cannot be deleted as easily as query parameter
+    const {username} = req.params
 
     if(!username?.trim())
         throw new ApiError(400,"username is missing")
@@ -440,12 +447,12 @@ const getUserChannelProfile = asyncHandler(async(res,req)=>{
 
 const getWatchHistory = asyncHandler(async(req,res)=>{
     //get strings like "asdlkfalkdsf" instead of 'ObjectId(sakdflasakfd)'
-    await req.user._id
+    req.user._id
 
     const user = await User.aggregate([
         {
             $match: {
-                _id : new mongoose.Types.ObjectId(await req.user._id)
+                _id : new mongoose.Types.ObjectId(req.user._id)
             }
         },
         {
